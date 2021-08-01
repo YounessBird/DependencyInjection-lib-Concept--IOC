@@ -8,4 +8,4 @@
 
 3.Choosing the registration type as Singleton or Transient.
 
-4.Using reflecion to instantiate instances. 
+4.Using reflection to instantiate instances. 
