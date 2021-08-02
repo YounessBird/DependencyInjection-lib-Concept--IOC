@@ -9,6 +9,7 @@ namespace DependencyIOC
     public class SomeService:ISomeService
     {
         private readonly IRandomGuidGenerator _randomGuidGenerator;
+       
         public SomeService(IRandomGuidGenerator randomGuidGenerator)
         {
             _randomGuidGenerator = randomGuidGenerator;
