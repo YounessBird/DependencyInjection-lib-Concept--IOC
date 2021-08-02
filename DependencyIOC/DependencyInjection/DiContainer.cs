@@ -16,25 +16,19 @@ namespace DependencyIOC
 
         public object GetService(Type serviceType)
         {
-            var desciptor = _serviceDescriptors
+            var descriptor = _serviceDescriptors
                 .SingleOrDefault(x => x.ServiceType == serviceType);
 
-            if (desciptor == null)
+            ThrowExceptionIfObjectNull(descriptor, serviceType);
+            //ReturnImplementationIfNotNUL(descriptor);
+            if (descriptor.Implementation != null)
             {
-                throw new Exception($"Service of type {serviceType.Name} isn't registered");
+                return descriptor.Implementation;
             }
 
-            if (desciptor.Implementation != null)
-            {
-                return desciptor.Implementation;
-            }
+            var actualType = descriptor.ImplementationType ?? descriptor.ServiceType;
 
-            var actualType = desciptor.ImplementationType ?? desciptor.ServiceType;
-
-            if (actualType.IsAbstract || actualType.IsInterface)
-            {
-                throw new Exception("Cannot instantiate abstract classes or interfaces");
-            }
+            ThrowExceptionIfTypeIsAbstractOrInterface(actualType);
 
             var constructorInfo = actualType.GetConstructors().First();
 
@@ -43,9 +37,9 @@ namespace DependencyIOC
 
             var implementation = Activator.CreateInstance(actualType, parameters);
 
-            if (desciptor.Lifetime == ServiceLifetime.Singleton)
+            if (descriptor.Lifetime == ServiceLifetime.Singleton)
             {
-                desciptor.Implementation = implementation;
+                descriptor.Implementation = implementation;
             }
 
             return implementation;
@@ -54,6 +48,31 @@ namespace DependencyIOC
         public T GetService<T>()
         {
             return (T)GetService(typeof(T));
+        }
+
+        public void ThrowExceptionIfObjectNull(ServiceDescriptor descriptor, Type serviceType)
+        {
+            if (descriptor == null)
+            {
+                throw new Exception($"Service of type {serviceType.Name} isn't registered");
+            }
+        }
+
+       // public object ReturnImplementationIfNotNUL(ServiceDescriptor descriptor)
+        //{
+         //   if (descriptor.Implementation != null)
+         //   {
+              //  return descriptor.Implementation;
+          //  }
+          //  else return null;
+            
+        //}
+        public void ThrowExceptionIfTypeIsAbstractOrInterface(Type actualType)
+        {
+            if (actualType.IsAbstract)
+            {
+                throw new Exception("Cannot instantiate abstract classes or interfaces");
+            }
         }
 
     }
